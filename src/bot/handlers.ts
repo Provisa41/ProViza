@@ -11,7 +11,10 @@ import {
   countriesListKeyboard,
   countryDetailKeyboard,
   getCountryDetailText,
+  regionListKeyboard,
+  schengenListKeyboard,
 } from "./countries.js";
+import { SCHENGEN_REGION } from "../data/schengenCountries.js";
 import {
   mainReplyKeyboard,
   sectionInlineKeyboard,
@@ -84,6 +87,24 @@ export function registerBotHandlers(bot: Bot): void {
     await ctx.editMessageText(countriesIntroText, {
       parse_mode: "HTML",
       reply_markup: countriesListKeyboard(),
+    });
+  });
+
+  bot.callbackQuery("region:schengen", async (ctx) => {
+    await ctx.answerCallbackQuery();
+    await ctx.editMessageText(
+      `🇪🇺 <b>Шенген — ${SCHENGEN_REGION}</b>\n\nВыберите страну подачи (основная цель поездки). Для каждой — чек-лист и проверка документов.`,
+      { parse_mode: "HTML", reply_markup: schengenListKeyboard() },
+    );
+  });
+
+  bot.callbackQuery(/^region:(.+)$/, async (ctx) => {
+    const region = decodeURIComponent(ctx.match![1]);
+    if (region === "schengen") return;
+    await ctx.answerCallbackQuery();
+    await ctx.editMessageText(`📁 <b>${region}</b>\n\nВыберите страну:`, {
+      parse_mode: "HTML",
+      reply_markup: regionListKeyboard(region),
     });
   });
 

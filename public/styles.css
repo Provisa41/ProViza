@@ -183,6 +183,32 @@ select {
   opacity: 0.8;
 }
 
+.check-verify {
+  margin: 12px 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.check-verify li {
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.check-verify li.ok {
+  color: #1e8449;
+}
+
+.check-verify li.miss {
+  opacity: 0.75;
+}
+
+.issues {
+  margin: 8px 0;
+  padding-left: 1.2rem;
+  font-size: 0.9rem;
+}
+
 .badge {
   display: inline-block;
   margin-top: 12px;

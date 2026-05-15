@@ -1,49 +1,11 @@
-export type VisaNewsItem = {
-  id: string;
-  countryId: string;
-  date: string;
-  title: string;
-  summary: string;
-  tag?: string;
-};
+import { schengenCountries, schengenNews, SCHENGEN_REGION } from "./schengenCountries.js";
+import type { CountryInfo, VisaNewsItem } from "./types.js";
 
-export type VisaTypeInfo = {
-  id: string;
-  name: string;
-  purpose: string;
-  processing: string;
-  documents: string[];
-  notes?: string;
-};
-
-export type CountryInfo = {
-  id: string;
-  flag: string;
-  name: string;
-  region: string;
-  summary: string;
-  visaTypes: VisaTypeInfo[];
-};
+export type { VisaNewsItem, VisaTypeInfo, CountryInfo } from "./types.js";
+export { SCHENGEN_REGION };
 
 export const visaNews: VisaNewsItem[] = [
-  {
-    id: "n1",
-    countryId: "schengen",
-    date: "2026-05-10",
-    title: "Шенген: очереди в визовые центры",
-    summary:
-      "В ряде стран ЕС срок ожидания записи — 3–6 недель. Подавайте за 2–3 месяца до поездки.",
-    tag: "сроки",
-  },
-  {
-    id: "n2",
-    countryId: "schengen",
-    date: "2026-05-08",
-    title: "Страховка: минимум 30 000 €",
-    summary:
-      "Полис должен покрывать все дни поездки, включая даты въезда и выезда. Для мультивизы — покрытие на первую поездку обязательно.",
-    tag: "документы",
-  },
+  ...schengenNews,
   {
     id: "n3",
     countryId: "usa",
@@ -263,43 +225,7 @@ export const visaNews: VisaNewsItem[] = [
 ];
 
 export const countries: CountryInfo[] = [
-  {
-    id: "schengen",
-    flag: "🇪🇺",
-    name: "Шенген (ЕС)",
-    region: "Европа",
-    summary: "Краткосрочная виза категории C до 90 дней в зоне Шенгена за полгода.",
-    visaTypes: [
-      {
-        id: "tourist",
-        name: "Туристическая",
-        purpose: "Отдых, экскурсии",
-        processing: "10–15 рабочих дней",
-        documents: [
-          "Загранпаспорт (срок ≥ 3 мес. после поездки, 2 чистые страницы)",
-          "Анкета + фото 35×45 мм",
-          "Страховка мин. 30 000 € на все дни",
-          "Бронь перелёта и жилья",
-          "Выписка из банка / спонсорство",
-          "Справка с работы или выписка из вуза",
-          "Копии внутреннего паспорта и прошлых виз",
-        ],
-        notes: "Подача в консульство страны основной цели или длительного пребывания.",
-      },
-      {
-        id: "business",
-        name: "Деловая",
-        purpose: "Встречи, переговоры, конференции",
-        processing: "10–20 рабочих дней",
-        documents: [
-          "Все документы туристической визы",
-          "Приглашение от компании в ЕС",
-          "Письмо работодателя о цели командировки",
-          "Выписка по счёту компании (если оплачивает работодатель)",
-        ],
-      },
-    ],
-  },
+  ...schengenCountries,
   {
     id: "usa",
     flag: "🇺🇸",
@@ -767,7 +693,21 @@ export function getCountry(id: string): CountryInfo | undefined {
 export function getNews(countryId?: string): VisaNewsItem[] {
   const sorted = [...visaNews].sort((a, b) => b.date.localeCompare(a.date));
   if (!countryId) return sorted;
-  return sorted.filter((n) => n.countryId === countryId);
+  const country = getCountry(countryId);
+  return sorted.filter(
+    (n) =>
+      n.countryId === countryId ||
+      (n.region && country && n.region === country.region),
+  );
+}
+
+export function getCountriesByRegion(): Record<string, CountryInfo[]> {
+  const map: Record<string, CountryInfo[]> = {};
+  for (const c of countries) {
+    if (!map[c.region]) map[c.region] = [];
+    map[c.region].push(c);
+  }
+  return map;
 }
 
 export function formatCountryDocumentsHtml(country: CountryInfo): string {

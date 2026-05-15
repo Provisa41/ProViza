@@ -37,8 +37,12 @@
 
         <section id="panel-documents" class="panel">
           <p class="muted">
-            Загрузите скан — демо-оценка готовности. Чек-лист по стране — вкладка «Страны».
+            Выберите страну подачи — проверим файл по её чек-листу (в т.ч. все страны Шенгена).
           </p>
+          <label for="check-country-select">Страна для проверки</label>
+          <select id="check-country-select">
+            <option value="">Загрузка…</option>
+          </select>
           <label class="file-label">
             <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" />
             <span>Выбрать документ</span>

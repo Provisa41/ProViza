@@ -2,7 +2,7 @@ import express from "express";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validateInitData } from "./auth/validateInitData.js";
-import { mockDocumentScore } from "./bot/copy.js";
+import { checkDocuments } from "./services/documentCheck.js";
 import { config } from "./config.js";
 import { countries, getCountry, getNews } from "./data/visaData.js";
 import { sendConsultLead } from "./services/consultLead.js";
@@ -34,6 +34,7 @@ export function createServer(bot: Bot): express.Express {
         region: c.region,
         summary: c.summary,
       })),
+      regions: [...new Set(countries.map((c) => c.region))],
     });
   });
 
@@ -100,7 +101,9 @@ export function createServer(bot: Bot): express.Express {
 
     const fileName =
       typeof req.body?.fileName === "string" ? req.body.fileName : "document.pdf";
-    const result = mockDocumentScore(fileName);
+    const countryId =
+      typeof req.body?.countryId === "string" ? req.body.countryId : undefined;
+    const result = checkDocuments(fileName, countryId);
     res.json({ ok: true, ...result, demo: true });
   });
 
