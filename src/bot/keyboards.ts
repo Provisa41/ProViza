@@ -21,6 +21,7 @@ export function welcomeInlineKeyboard(botUsername?: string) {
     .row()
     .text("🗺 Страны", "cmd:countries")
     .text("🌍 Новости", "cmd:updates")
+    .row()
     .text("👤 Консультация", "cmd:consult");
 
   if (botUsername) {

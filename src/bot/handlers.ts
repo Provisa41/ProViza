@@ -21,9 +21,11 @@ import {
   welcomeInlineKeyboard,
 } from "./keyboards.js";
 import { promptConsult, registerConsultHandlers } from "./consult.js";
+import { safeEditOrReply } from "./callbackHelpers.js";
 
 export function registerBotHandlers(bot: Bot): void {
   registerConsultHandlers(bot);
+
   bot.command("start", async (ctx) => {
     const startParam = ctx.match?.trim();
     const me = await ctx.api.getMe();
@@ -62,48 +64,39 @@ export function registerBotHandlers(bot: Bot): void {
   });
 
   bot.callbackQuery("cmd:countries", async (ctx) => {
-    await ctx.answerCallbackQuery();
-    await ctx.editMessageText(countriesIntroText, {
-      parse_mode: "HTML",
+    await safeEditOrReply(ctx, countriesIntroText, {
       reply_markup: countriesListKeyboard(),
     });
   });
 
   bot.callbackQuery("cmd:updates", async (ctx) => {
-    await ctx.answerCallbackQuery();
-    await ctx.editMessageText(formatNewsDigestHtml(5), {
-      parse_mode: "HTML",
+    await safeEditOrReply(ctx, formatNewsDigestHtml(5), {
       reply_markup: sectionInlineKeyboard("updates"),
     });
   });
 
   bot.callbackQuery("cmd:consult", async (ctx) => {
-    await ctx.answerCallbackQuery();
+    await ctx.answerCallbackQuery().catch(() => {});
     await promptConsult(ctx);
   });
 
   bot.callbackQuery("countries:list", async (ctx) => {
-    await ctx.answerCallbackQuery();
-    await ctx.editMessageText(countriesIntroText, {
-      parse_mode: "HTML",
+    await safeEditOrReply(ctx, countriesIntroText, {
       reply_markup: countriesListKeyboard(),
     });
   });
 
   bot.callbackQuery("region:schengen", async (ctx) => {
-    await ctx.answerCallbackQuery();
-    await ctx.editMessageText(
+    await safeEditOrReply(
+      ctx,
       `🇪🇺 <b>Шенген — ${SCHENGEN_REGION}</b>\n\nВыберите страну подачи (основная цель поездки). Для каждой — чек-лист и проверка документов.`,
-      { parse_mode: "HTML", reply_markup: schengenListKeyboard() },
+      { reply_markup: schengenListKeyboard() },
     );
   });
 
   bot.callbackQuery(/^region:(.+)$/, async (ctx) => {
     const region = decodeURIComponent(ctx.match![1]);
-    if (region === "schengen") return;
-    await ctx.answerCallbackQuery();
-    await ctx.editMessageText(`📁 <b>${region}</b>\n\nВыберите страну:`, {
-      parse_mode: "HTML",
+    await safeEditOrReply(ctx, `📁 <b>${region}</b>\n\nВыберите страну:`, {
       reply_markup: regionListKeyboard(region),
     });
   });
@@ -111,13 +104,11 @@ export function registerBotHandlers(bot: Bot): void {
   bot.callbackQuery(/^country:(.+)$/, async (ctx) => {
     const countryId = ctx.match![1];
     const text = getCountryDetailText(countryId);
-    await ctx.answerCallbackQuery();
     if (!text) {
-      await ctx.reply("Страна не найдена.");
+      await ctx.answerCallbackQuery({ text: "Страна не найдена" });
       return;
     }
-    await ctx.editMessageText(text, {
-      parse_mode: "HTML",
+    await safeEditOrReply(ctx, text, {
       reply_markup: countryDetailKeyboard(countryId),
     });
   });
@@ -125,11 +116,15 @@ export function registerBotHandlers(bot: Bot): void {
   bot.callbackQuery(/^news:(.+)$/, async (ctx) => {
     const countryId = ctx.match![1];
     const items = getNews(countryId).slice(0, 4);
-    await ctx.answerCallbackQuery();
+    await ctx.answerCallbackQuery().catch(() => {});
+
     if (!items.length) {
-      await ctx.reply("Новостей по этой стране пока нет.");
+      await ctx.reply("Новостей по этой стране пока нет.", {
+        reply_markup: countryDetailKeyboard(countryId),
+      });
       return;
     }
+
     const lines = items.flatMap((n) => [
       `<b>${n.title}</b> (${n.date})`,
       n.summary,
@@ -169,6 +164,11 @@ export function registerBotHandlers(bot: Bot): void {
     await ctx.reply("Откройте Mini App:", {
       reply_markup: welcomeInlineKeyboard(me.username),
     });
+  });
+
+  bot.on("callback_query:data", async (ctx) => {
+    console.warn("Unhandled callback:", ctx.callbackQuery.data);
+    await ctx.answerCallbackQuery({ text: "Обновите чат: /start" });
   });
 
   bot.on("message", async (ctx, next) => {
