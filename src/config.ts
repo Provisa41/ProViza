@@ -46,6 +46,12 @@ export function miniAppUrl(startapp?: string): string {
   return `${base}${sep}tgWebAppStartParam=${encodeURIComponent(startapp)}`;
 }
 
+/** Публичный URL webhook для Telegram (отдельный Vercel-маршрут api/telegram.ts) */
 export function webhookUrl(): string {
-  return `${config.webhookBaseUrl}/${config.webhookSecret}`;
+  return `${config.webhookBaseUrl}/api/telegram`;
+}
+
+/** Устаревший путь — оставлен для совместимости на Express */
+export function legacyWebhookPath(): string {
+  return `/${config.webhookSecret}`;
 }

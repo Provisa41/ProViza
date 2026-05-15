@@ -8,7 +8,7 @@ export function createBot(): Bot {
   registerBotHandlers(bot);
 
   bot.catch((err) => {
-    console.error("Bot error:", err.error);
+    console.error("Bot error:", err.ctx?.update?.update_id, err.error);
   });
 
   return bot;

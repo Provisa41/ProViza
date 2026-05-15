@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validateInitData } from "./auth/validateInitData.js";
 import { checkDocuments } from "./services/documentCheck.js";
-import { config } from "./config.js";
+import { config, legacyWebhookPath } from "./config.js";
 import { countries, getCountry, getNews } from "./data/visaData.js";
 import { sendConsultLead } from "./services/consultLead.js";
 import type { Bot } from "grammy";
@@ -23,6 +23,14 @@ export function createServer(bot: Bot): express.Express {
   app.get("/health", (_req, res) => {
     res.json({ ok: true, service: "provisa" });
   });
+
+  app.get("/api/telegram", (_req, res) => {
+    res.json({ ok: true, webhook: true, hint: "POST only from Telegram" });
+  });
+
+  const telegramWebhook = webhookCallback(bot, "express");
+  app.post("/api/telegram", telegramWebhook);
+  app.post(legacyWebhookPath(), telegramWebhook);
 
   app.get("/api/countries", (_req, res) => {
     res.json({
@@ -53,8 +61,6 @@ export function createServer(bot: Bot): express.Express {
       typeof req.query.country === "string" ? req.query.country : undefined;
     res.json({ ok: true, news: getNews(countryId) });
   });
-
-  app.post(`/${config.webhookSecret}`, webhookCallback(bot, "express"));
 
   app.post("/api/auth/session", (req, res) => {
     const initData =

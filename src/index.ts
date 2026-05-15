@@ -1,9 +1,10 @@
 import { getApp } from "./app.js";
 import { config, webhookUrl } from "./config.js";
-import { createBot, configureBot } from "./bot/index.js";
+import { configureBot } from "./bot/index.js";
+import { getBot } from "./bot/instance.js";
 
 async function main(): Promise<void> {
-  const bot = createBot();
+  const bot = getBot();
   if (config.isDev) {
     console.warn("Dev mode: skipping Telegram bot profile setup");
   } else {

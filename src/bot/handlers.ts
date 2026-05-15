@@ -77,7 +77,12 @@ export function registerBotHandlers(bot: Bot): void {
 
   bot.callbackQuery("cmd:consult", async (ctx) => {
     await ctx.answerCallbackQuery().catch(() => {});
-    await promptConsult(ctx);
+    try {
+      await promptConsult(ctx);
+    } catch (err) {
+      console.error("cmd:consult error:", err);
+      await ctx.reply(consultText, { parse_mode: "HTML" }).catch(() => {});
+    }
   });
 
   bot.callbackQuery("countries:list", async (ctx) => {
