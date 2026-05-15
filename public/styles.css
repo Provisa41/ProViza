@@ -209,6 +209,27 @@ select {
   font-size: 0.9rem;
 }
 
+.special-req {
+  margin: 16px 0;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, #f39c12 12%, var(--tg-secondary));
+  border-left: 3px solid #e67e22;
+}
+
+.special-req h3,
+.special-req h4 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.special-req ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
 .badge {
   display: inline-block;
   margin-top: 12px;

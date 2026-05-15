@@ -6,6 +6,7 @@ export type DocumentCheckResult = {
   summary: string;
   issues: string[];
   checklist: { item: string; suggested: boolean }[];
+  specialRequirements: string[];
   countryId?: string;
   countryName?: string;
 };
@@ -90,14 +91,21 @@ export function checkDocuments(
 
   const countryLabel = country ? `${country.flag} ${country.name}` : "общий пакет";
 
+  if (country?.specialRequirements?.length) {
+    issues.push(
+      `Особые требования ${country.name}: ${country.specialRequirements[0]}`,
+    );
+  }
+
   return {
     score,
     summary:
       score >= 85
-        ? `Файл «${fileName}» учтён в пакете для ${countryLabel}. Сверьте полный чек-лист перед подачей.`
-        : `Предварительная оценка для ${countryLabel}. Дозагрузите недостающие документы из чек-листа.`,
-    issues: [...new Set(issues)].slice(0, 5),
+        ? `Файл «${fileName}» учтён в пакете для ${countryLabel}. Сверьте чек-лист и особые требования.`
+        : `Предварительная оценка для ${countryLabel}. Дозагрузите документы и проверьте особые требования консульства.`,
+    issues: [...new Set(issues)].slice(0, 6),
     checklist,
+    specialRequirements: country?.specialRequirements ?? [],
     countryId,
     countryName: country?.name,
   };

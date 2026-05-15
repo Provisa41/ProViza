@@ -1,4 +1,5 @@
 import { schengenCountries, schengenNews, SCHENGEN_REGION } from "./schengenCountries.js";
+import { mergeSpecialRequirements } from "./specialRequirements.js";
 import type { CountryInfo, VisaNewsItem } from "./types.js";
 
 export type { VisaNewsItem, VisaTypeInfo, CountryInfo } from "./types.js";
@@ -224,7 +225,7 @@ export const visaNews: VisaNewsItem[] = [
   },
 ];
 
-export const countries: CountryInfo[] = [
+const countriesRaw: CountryInfo[] = [
   ...schengenCountries,
   {
     id: "usa",
@@ -686,6 +687,8 @@ export const countries: CountryInfo[] = [
   },
 ];
 
+export const countries: CountryInfo[] = mergeSpecialRequirements(countriesRaw);
+
 export function getCountry(id: string): CountryInfo | undefined {
   return countries.find((c) => c.id === id);
 }
@@ -724,6 +727,12 @@ export function formatCountryDocumentsHtml(country: CountryInfo): string {
     lines.push("<b>Документы:</b>");
     vt.documents.forEach((d, i) => lines.push(`${i + 1}. ${d}`));
     if (vt.notes) lines.push(`\n<i>${vt.notes}</i>`);
+    lines.push("");
+  }
+
+  if (country.specialRequirements?.length) {
+    lines.push("<b>⚠️ Особые требования:</b>");
+    country.specialRequirements.forEach((r, i) => lines.push(`${i + 1}. ${r}`));
     lines.push("");
   }
 

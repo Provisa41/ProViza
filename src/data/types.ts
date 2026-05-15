@@ -25,4 +25,6 @@ export type CountryInfo = {
   region: string;
   summary: string;
   visaTypes: VisaTypeInfo[];
+  /** Особые требования консульства / визового центра */
+  specialRequirements?: string[];
 };

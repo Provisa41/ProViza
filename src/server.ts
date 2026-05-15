@@ -33,6 +33,7 @@ export function createServer(bot: Bot): express.Express {
         name: c.name,
         region: c.region,
         summary: c.summary,
+        specialRequirements: c.specialRequirements ?? [],
       })),
       regions: [...new Set(countries.map((c) => c.region))],
     });

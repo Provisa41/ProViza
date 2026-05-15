@@ -140,9 +140,20 @@ function renderCountryDetail(country) {
   `,
     )
     .join("");
+  const special =
+    country.specialRequirements?.length > 0
+      ? `
+    <section class="special-req">
+      <h3>⚠️ Особые требования</h3>
+      <ul>${country.specialRequirements.map((r) => `<li>${r}</li>`).join("")}</ul>
+    </section>
+  `
+      : "";
+
   countryDetail.innerHTML = `
     <p class="country-summary">${country.flag} <strong>${country.name}</strong> — ${country.summary}</p>
     ${types}
+    ${special}
     <p class="badge">Справочно · уточняйте в консульстве</p>
   `;
 }
@@ -288,10 +299,16 @@ checkBtn?.addEventListener("click", async () => {
           )
           .join("")}</ul>`
       : "";
+    const specialHtml = data.specialRequirements?.length
+      ? `<section class="special-req"><h4>Особые требования</h4><ul>${data.specialRequirements
+          .map((r) => `<li>${r}</li>`)
+          .join("")}</ul></section>`
+      : "";
     resultEl.innerHTML = `
       <p class="score">Готовность: <strong>${data.score}%</strong></p>
       <p>${data.summary}</p>
       ${checklistHtml}
+      ${specialHtml}
       ${
         data.issues?.length
           ? `<ul class="issues">${data.issues.map((i) => `<li>${i}</li>`).join("")}</ul>`
