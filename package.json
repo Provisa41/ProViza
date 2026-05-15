@@ -12,7 +12,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "set-webhook": "tsx scripts/set-webhook.ts",
-    "setup-telegram": "tsx scripts/setup-telegram.ts"
+    "setup-telegram": "tsx scripts/setup-telegram.ts",
+    "check-webhook": "tsx scripts/check-webhook.ts"
   },
   "dependencies": {
     "@grammyjs/types": "^3.21.0",

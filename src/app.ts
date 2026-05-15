@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { getBot } from "./bot/instance.js";
+import { ensureBotReady, getBot } from "./bot/instance.js";
 import { createServer } from "./server.js";
 
 let app: Express | undefined;
@@ -8,6 +8,9 @@ let app: Express | undefined;
 export function getApp(): Express {
   if (!app) {
     app = createServer(getBot());
+    void ensureBotReady().catch((err) => {
+      console.error("Bot init failed:", err);
+    });
   }
   return app;
 }

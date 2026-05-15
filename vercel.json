@@ -1,15 +1,23 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "/api/telegram", "destination": "/api/telegram" },
-    { "source": "/(.*)", "destination": "/api" }
+    { "source": "/health", "destination": "/api/health" },
+    {
+      "source": "/((?!api/telegram|api/health).*)",
+      "destination": "/api"
+    }
   ],
   "functions": {
+    "api/health.ts": {
+      "maxDuration": 10
+    },
     "api/index.ts": {
-      "includeFiles": "public/**"
+      "includeFiles": "public/**",
+      "maxDuration": 30
     },
     "api/telegram.ts": {
-      "includeFiles": "src/**"
+      "includeFiles": "src/**",
+      "maxDuration": 30
     }
   }
 }

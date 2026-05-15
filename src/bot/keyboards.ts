@@ -13,13 +13,26 @@ export function mainReplyKeyboard() {
     .resized();
 }
 
-export function welcomeInlineKeyboard(botUsername?: string) {
-  const kb = new InlineKeyboard()
-    .webApp("🚀 Открыть Pro Visa", miniAppUrl())
-    .row()
-    .webApp("📄 Проверить документы", miniAppUrl("documents"))
-    .row()
+/** Только callback-кнопки — не падает, если Web App URL ещё не настроен в BotFather */
+export function welcomeInlineKeyboardTextOnly() {
+  return new InlineKeyboard()
     .text("🗺 Страны", "cmd:countries")
+    .text("🌍 Новости", "cmd:updates")
+    .row()
+    .text("👤 Консультация", "cmd:consult");
+}
+
+export function welcomeInlineKeyboard(botUsername?: string, withWebApp = true) {
+  const kb = new InlineKeyboard();
+
+  if (withWebApp) {
+    kb.webApp("🚀 Открыть Pro Visa", miniAppUrl())
+      .row()
+      .webApp("📄 Проверить документы", miniAppUrl("documents"))
+      .row();
+  }
+
+  kb.text("🗺 Страны", "cmd:countries")
     .text("🌍 Новости", "cmd:updates")
     .row()
     .text("👤 Консультация", "cmd:consult");

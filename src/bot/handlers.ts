@@ -1,4 +1,4 @@
-import type { Bot } from "grammy";
+import type { Bot, Context } from "grammy";
 import {
   consultText,
   countriesIntroText,
@@ -23,16 +23,26 @@ import {
 import { promptConsult, registerConsultHandlers } from "./consult.js";
 import { safeEditOrReply } from "./callbackHelpers.js";
 
-export function registerBotHandlers(bot: Bot): void {
-  registerConsultHandlers(bot);
-
-  bot.command("start", async (ctx) => {
-    const startParam = ctx.match?.trim();
-    const me = await ctx.api.getMe();
+async function replyWelcome(ctx: Context): Promise<void> {
+  const username = ctx.me?.username;
+  try {
     await ctx.reply(welcomeText, {
       parse_mode: "HTML",
-      reply_markup: welcomeInlineKeyboard(me.username),
+      reply_markup: welcomeInlineKeyboard(username, true),
     });
+  } catch (err) {
+    console.error("start: webApp keyboard failed, fallback:", err);
+    await ctx.reply(welcomeText, {
+      parse_mode: "HTML",
+      reply_markup: welcomeInlineKeyboard(username, false),
+    });
+  }
+}
+
+export function registerBotHandlers(bot: Bot): void {
+  bot.command("start", async (ctx) => {
+    const startParam = ctx.match?.trim();
+    await replyWelcome(ctx);
     await ctx.reply("Меню команд:", { reply_markup: mainReplyKeyboard() });
     if (startParam) {
       await ctx.reply(
@@ -165,9 +175,8 @@ export function registerBotHandlers(bot: Bot): void {
   bot.hears("👤 Консультация", (ctx) => promptConsult(ctx));
 
   bot.hears("🛂 Открыть приложение", async (ctx) => {
-    const me = await ctx.api.getMe();
     await ctx.reply("Откройте Mini App:", {
-      reply_markup: welcomeInlineKeyboard(me.username),
+      reply_markup: welcomeInlineKeyboard(ctx.me?.username, true),
     });
   });
 
@@ -191,4 +200,6 @@ export function registerBotHandlers(bot: Bot): void {
       { reply_markup: mainReplyKeyboard() },
     );
   });
+
+  registerConsultHandlers(bot);
 }

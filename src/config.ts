@@ -23,13 +23,18 @@ function parseAdminChatId(): number | undefined {
   if (!raw) return undefined;
   const id = Number(raw);
   if (!Number.isFinite(id)) {
-    throw new Error("ADMIN_CHAT_ID must be a numeric Telegram chat ID");
+    console.warn(
+      "ADMIN_CHAT_ID is not a number — consult leads will not be forwarded. Fix in Vercel env.",
+    );
+    return undefined;
   }
   return id;
 }
 
 export const config = {
-  botToken: required("BOT_TOKEN"),
+  get botToken() {
+    return required("BOT_TOKEN");
+  },
   webhookBaseUrl: resolveWebhookBaseUrl(),
   webhookSecret: process.env.WEBHOOK_SECRET ?? "provisa-webhook",
   miniAppPath: process.env.MINI_APP_PATH ?? "/app",
