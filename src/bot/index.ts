@@ -1,40 +1,42 @@
-import { Bot } from "grammy";
-import { config } from "../config.js";
-import { registerBotHandlers } from "./handlers.js";
-import { mainReplyKeyboard } from "./keyboards.js";
+import { getApp } from "./app.js";
+import { config, webhookUrl } from "./config.js";
+import { configureBot } from "./bot/index.js";
+import { getBot } from "./bot/instance.js";
 
-export function createBot(): Bot {
-  const bot = new Bot(config.botToken);
-  registerBotHandlers(bot);
+async function main(): Promise<void> {
+  const bot = getBot();
+  if (config.isDev) {
+    console.warn("Dev mode: using long polling instead of webhooks");
+    await bot.start({
+      onError: (err) => console.error("Bot error:", err),
+    });
+  } else {
+    await configureBot(bot);
+    const app = getApp();
+    app.listen(config.port, async () => {
+      const url = webhookUrl();
+      const miniApp = `${config.webhookBaseUrl}${config.miniAppPath}`;
+      console.log(`Pro Visa listening on http://localhost:${config.port}`);
+      console.log(`Mini App (browser): http://localhost:${config.port}${config.miniAppPath}`);
+      console.log(`Health: http://localhost:${config.port}/health`);
 
-  bot.catch((err) => {
-    console.error("Bot error:", err.ctx?.update?.update_id, err.error);
-  });
-
-  return bot;
+      try {
+        await bot.api.setWebhook(url, {
+          allowed_updates: ["message", "callback_query", "inline_query"],
+          drop_pending_updates: false,
+        });
+        console.log(`Webhook: ${url}`);
+        console.log(`Mini App (Telegram): ${miniApp}`);
+      } catch (err) {
+        console.warn("Webhook not set:", err);
+      }
+    });
+  }
 }
 
-export const BOT_COMMANDS = [
-  { command: "start", description: "Запуск бота" },
-  { command: "countries", description: "Документы по странам" },
-  { command: "documents", description: "Проверка документов AI" },
-  { command: "updates", description: "Визовые новости" },
-  { command: "consult", description: "Заказать консультацию" },
-] as const;
-
-export async function configureBot(bot: Bot): Promise<void> {
-  await bot.api.setMyCommands([...BOT_COMMANDS]);
-  await bot.api.setMyDescription(
-    "Pro Visa — AI-проверка визовых документов и консультации экспертов.",
-  );
-  await bot.api.setMyShortDescription(
-    "Визовый помощник: документы за 30 секунд, обновления политики, консультации.",
-  );
-
-  const menuButton = {
-    type: "web_app" as const,
-    text: "Открыть Pro Visa",
-    web_app: { url: `${config.webhookBaseUrl}${config.miniAppPath}` },
-  };
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
   await bot.api.setChatMenuButton({ menu_button: menuButton });
 }
