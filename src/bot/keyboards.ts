@@ -3,6 +3,8 @@ import { miniAppUrl } from "../config.js";
 
 export function mainReplyKeyboard() {
   return new Keyboard()
+    .text("🚀 Старт")
+    .row()
     .text("📄 Документы")
     .text("🗺 Страны")
     .row()
