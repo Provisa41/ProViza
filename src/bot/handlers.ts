@@ -71,11 +71,6 @@ export function registerBotHandlers(bot: Bot): void {
     });
   });
 
-  bot.hears("🚀 Старт", async (ctx) => {
-    await replyWelcome(ctx);
-    await ctx.reply("Меню команд:", { reply_markup: mainReplyKeyboard() });
-  });
-
   bot.callbackQuery("cmd:countries", async (ctx) => {
     await safeEditOrReply(ctx, countriesIntroText, {
       reply_markup: countriesListKeyboard(),
