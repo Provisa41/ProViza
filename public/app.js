@@ -260,10 +260,15 @@ function onCountryChange(id) {
   if (id) loadNews(id).catch(() => {});
 }
 
+function updateCheckButtonState() {
+  checkBtn.disabled = !selectedFile || !checkCountrySelect?.value;
+}
+
 countrySelect?.addEventListener("change", () => onCountryChange(countrySelect.value));
 
 checkCountrySelect?.addEventListener("change", () => {
   if (checkCountrySelect.value) onCountryChange(checkCountrySelect.value);
+  updateCheckButtonState();
 });
 
 newsFilter?.addEventListener("change", () => {
@@ -274,12 +279,7 @@ newsFilter?.addEventListener("change", () => {
 
 fileInput?.addEventListener("change", () => {
   selectedFile = fileInput.files?.[0] ?? null;
-  const hasCountry = !!checkCountrySelect?.value;
-  checkBtn.disabled = !selectedFile || !hasCountry;
-});
-
-checkCountrySelect?.addEventListener("change", () => {
-  checkBtn.disabled = !selectedFile || !checkCountrySelect.value;
+  updateCheckButtonState();
 });
 
 checkBtn?.addEventListener("click", async () => {
@@ -323,7 +323,7 @@ checkBtn?.addEventListener("click", async () => {
     resultEl.classList.remove("hidden");
     tg?.HapticFeedback?.notificationOccurred("error");
   } finally {
-    checkBtn.disabled = !selectedFile || !checkCountrySelect?.value;
+    updateCheckButtonState();
   }
 });
 
