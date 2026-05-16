@@ -52,6 +52,11 @@ export function registerBotHandlers(bot: Bot): void {
     }
   });
 
+  bot.hears("🚀 Старт", async (ctx) => {
+    await replyWelcome(ctx);
+    await ctx.reply("Меню команд:", { reply_markup: mainReplyKeyboard() });
+  });
+  
   bot.command("documents", async (ctx) => {
     await ctx.reply(documentsText, {
       parse_mode: "HTML",
@@ -66,11 +71,9 @@ export function registerBotHandlers(bot: Bot): void {
     });
   });
 
-  bot.command("updates", async (ctx) => {
-    await ctx.reply(formatNewsDigestHtml(5), {
-      parse_mode: "HTML",
-      reply_markup: sectionInlineKeyboard("updates"),
-    });
+  bot.hears("🚀 Старт", async (ctx) => {
+    await replyWelcome(ctx);
+    await ctx.reply("Меню команд:", { reply_markup: mainReplyKeyboard() });
   });
 
   bot.callbackQuery("cmd:countries", async (ctx) => {
@@ -188,6 +191,7 @@ export function registerBotHandlers(bot: Bot): void {
   bot.on("message", async (ctx, next) => {
     if (ctx.message.text?.startsWith("/")) return next();
     const known = [
+      "🚀 Старт",
       "📄 Документы",
       "🗺 Страны",
       "🌍 Обновления",
