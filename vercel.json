@@ -3,7 +3,7 @@
   "rewrites": [
     { "source": "/health", "destination": "/api/health" },
     {
-      "source": "/((?!api/telegram|api/health).*)",
+      "source": "/((?!api/telegram|api/health|app/.*).*)",
       "destination": "/api"
     }
   ],
