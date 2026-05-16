@@ -38,5 +38,3 @@ main().catch((err) => {
   console.error(err);
   process.exit(1);
 });
-  await bot.api.setChatMenuButton({ menu_button: menuButton });
-}
